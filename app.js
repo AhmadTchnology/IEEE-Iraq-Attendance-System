@@ -397,13 +397,19 @@
 
     elements.emptyState.hidden = true;
 
+    // Keep view toggle buttons in sync
+    elements.viewGridBtn.classList.toggle('active', state.viewMode === 'grid');
+    elements.viewTableBtn.classList.toggle('active', state.viewMode === 'table');
+
     if (state.viewMode === 'grid') {
-      elements.gridContainer.hidden = false;
       elements.tableContainer.hidden = true;
+      elements.gridContainer.hidden = false;
+      elements.tableBody.innerHTML = '';
       renderGrid(list);
     } else {
       elements.gridContainer.hidden = true;
       elements.tableContainer.hidden = false;
+      elements.gridContainer.innerHTML = '';
       renderTable(list);
     }
   }
