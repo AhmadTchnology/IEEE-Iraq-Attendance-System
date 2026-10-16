@@ -1,0 +1,18 @@
+{
+  "name": "ieee-attendance-system",
+  "version": "1.0.0",
+  "description": "IEEE Fast-Desk Event Attendance System",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "ieee",
+    "attendance",
+    "check-in",
+    "event-desk"
+  ],
+  "author": "IEEE",
+  "license": "ISC"
+}

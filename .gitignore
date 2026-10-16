@@ -1,0 +1,22 @@
+# Dependency directories
+node_modules/
+
+# Agent & AI configuration
+.agents/
+.agent/
+
+# Attendee registration data containing personal info (PII / Privacy)
+attendance-registration-form-*.csv
+*.csv
+initial-data.json
+data.js
+
+# Internal project planning & design notes
+ieee-attendance-system.md
+DESIGN.md
+
+# Logs and system files
+*.log
+.env
+.DS_Store
+Thumbs.db
