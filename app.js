@@ -103,6 +103,222 @@
      Text Normalization & Bilingual Search Engine
      ========================================================================== */
 
+  /* ==========================================================================
+     Text Normalization & Bilingual Transliteration Search Engine
+     ========================================================================== */
+
+  // Common Arabic-English Name Correspondence Dictionary
+  const NAME_MAP = {
+    'ali': ['علي'],
+    'ahmed': ['احمد'],
+    'ahmad': ['احمد'],
+    'mohammed': ['محمد'],
+    'mohamed': ['محمد'],
+    'muhammad': ['محمد'],
+    'muhamad': ['محمد'],
+    'mhamad': ['محمد'],
+    'mahmoud': ['محمود'],
+    'mahmood': ['محمود'],
+    'mustafa': ['مصطفي', 'مصطفى'],
+    'moustafa': ['مصطفي', 'مصطفى'],
+    'murtadha': ['مرتضي', 'مرتضى'],
+    'murtada': ['مرتضي', 'مرتضى'],
+    'murtaza': ['مرتضي', 'مرتضى'],
+    'mujtaba': ['مجتبي', 'مجتبى'],
+    'mojtaba': ['مجتبي', 'مجتبى'],
+    'hassan': ['حسن'],
+    'hasan': ['حسن'],
+    'hussein': ['حسين'],
+    'hussain': ['حسين'],
+    'husein': ['حسين'],
+    'hasnain': ['حسنين'],
+    'hasaneen': ['حسنين'],
+    'hassanain': ['حسنين'],
+    'fatima': ['فاطمه', 'فاطمة'],
+    'fatimah': ['فاطمه', 'فاطمة'],
+    'fatma': ['فاطمه', 'فاطمة'],
+    'zainab': ['زينب'],
+    'zeinab': ['زينب'],
+    'zaynab': ['زينب'],
+    'maryam': ['مريم'],
+    'mariam': ['مريم'],
+    'zahra': ['زهراء', 'زهره'],
+    'zahraa': ['زهراء', 'زهره'],
+    'taha': ['طه'],
+    'ziad': ['زياد'],
+    'zeyad': ['زياد'],
+    'bariq': ['بارق'],
+    'muhannad': ['مهند'],
+    'mohanad': ['مهند'],
+    'wafa': ['وفاء'],
+    'wafaa': ['وفاء'],
+    'jumaa': ['جمعه', 'جمعة'],
+    'jomaa': ['جمعه', 'جمعة'],
+    'raghad': ['رغد'],
+    'diaa': ['ضياء'],
+    'diyaa': ['ضياء'],
+    'dhia': ['ضياء'],
+    'dhiaa': ['ضياء'],
+    'rashid': ['رشيد'],
+    'rashed': ['راشد', 'رشيد'],
+    'yaser': ['ياسر'],
+    'yasser': ['ياسر'],
+    'ammar': ['عمار'],
+    'abdul': ['عبد'],
+    'abd': ['عبد'],
+    'abdel': ['عبد'],
+    'hakam': ['حكم'],
+    'al-hakam': ['الحكم'],
+    'al hakam': ['الحكم'],
+    'motaz': ['معتز'],
+    'moataz': ['معتز'],
+    'muataz': ['معتز'],
+    'basim': ['باسم'],
+    'bassem': ['باسم'],
+    'khalid': ['خالد'],
+    'khaled': ['خالد'],
+    'ayham': ['ايهم'],
+    'jabar': ['جبار'],
+    'jabbar': ['جبار'],
+    'dawood': ['داود', 'داوود'],
+    'dawoud': ['داود', 'داوود'],
+    'aqeel': ['عقيل'],
+    'aqil': ['عقيل'],
+    'mays': ['ميس'],
+    'mais': ['ميس'],
+    'fouad': ['فؤاد', 'فواد'],
+    'fuad': ['فؤاد', 'فواد'],
+    'basit': ['باسط'],
+    'sohail': ['سهيل'],
+    'suhail': ['سهيل'],
+    'satie': ['ساطع'],
+    'batool': ['بتول'],
+    'batul': ['بتول'],
+    'defaa': ['دفاع'],
+    'najah': ['نجاح'],
+    'karrar': ['كرار'],
+    'abbas': ['عباس'],
+    'haidar': ['حيدر'],
+    'haider': ['حيدر'],
+    'haydar': ['حيدر'],
+    'jaafar': ['جعفر'],
+    'jafar': ['جعفر'],
+    'mahdi': ['مهدي'],
+    'mehdi': ['مهدي'],
+    'sajjad': ['سجاد'],
+    'sajad': ['سجاد'],
+    'baqir': ['باقر'],
+    'baqer': ['باقر'],
+    'sadiq': ['صادق'],
+    'sadeq': ['صادق'],
+    'alsadiq': ['الصادق'],
+    'kadhim': ['كاظم'],
+    'kadhem': ['كاظم'],
+    'kazem': ['كاظم'],
+    'jawad': ['جواد'],
+    'hadi': ['هادي'],
+    'yousef': ['يوسف'],
+    'youssef': ['يوسف'],
+    'yusuf': ['يوسف'],
+    'ayman': ['ايمن'],
+    'bilal': ['بلال'],
+    'hamza': ['حمزه', 'حمزة'],
+    'waleed': ['وليد'],
+    'walid': ['وليد'],
+    'saif': ['سيف'],
+    'sayf': ['سيف'],
+    'amjad': ['امجد'],
+    'anwar': ['انور'],
+    'laith': ['ليث'],
+    'layth': ['ليث'],
+    'marwan': ['مروان'],
+    'munir': ['منير'],
+    'muneer': ['منير'],
+    'nabeel': ['نبيل'],
+    'nabil': ['نبيل'],
+    'nasser': ['ناصر'],
+    'nasir': ['ناصر'],
+    'othman': ['عثمان'],
+    'osman': ['عثمان'],
+    'qasim': ['قاسم'],
+    'kasim': ['قاسم'],
+    'raheem': ['رحيم'],
+    'rahim': ['رحيم'],
+    'riad': ['رياض'],
+    'riyadh': ['رياض'],
+    'saad': ['سعد'],
+    'salah': ['صلاح'],
+    'saleh': ['صالح'],
+    'salman': ['سلمان'],
+    'samir': ['سمير'],
+    'sameer': ['سمير'],
+    'sami': ['سامي'],
+    'tariq': ['طارق'],
+    'tareq': ['طارق'],
+    'yahya': ['يحيي', 'يحيى'],
+    'younis': ['يونس'],
+    'yunus': ['يونس'],
+    'noor': ['نور'],
+    'nour': ['نور'],
+    'huda': ['هدي', 'هدى'],
+    'aya': ['ايه', 'اية'],
+    'ayah': ['ايه', 'اية'],
+    'dina': ['دينا'],
+    'reem': ['ريم'],
+    'sarah': ['ساره', 'سارة'],
+    'sara': ['ساره', 'سارة'],
+    'shams': ['شمس'],
+    'shahad': ['شهد'],
+    'marwah': ['مروه', 'مروة'],
+    'marwa': ['مروه', 'مروة'],
+    'duaa': ['دعاء'],
+    'zain': ['زين'],
+    'zein': ['زين'],
+    'farah': ['فرح'],
+    'rana': ['رنا'],
+    'rasha': ['رشا'],
+    'heba': ['هبه', 'هبة'],
+    'asmaa': ['اسماء'],
+    'asma': ['اسماء'],
+    'alaa': ['علاء'],
+    'ala': ['علاء'],
+    'israa': ['اسراء'],
+    'manar': ['منار'],
+    'rawan': ['روان'],
+    'tabarak': ['تبارك'],
+    'banin': ['بنين'],
+    'baneen': ['بنين'],
+    'dhuha': ['ضحي', 'ضحى'],
+    'duha': ['ضحي', 'ضحى'],
+    'teba': ['طيبه', 'طيبة'],
+    'tiba': ['طيبه', 'طيبة'],
+    'thaer': ['ثائر'],
+    'thamer': ['ثامر'],
+    'fahdi': ['فهدي'],
+    'al-fahdi': ['الفهدي'],
+    'alfahdi': ['الفهدي'],
+    'dalal': ['دلال'],
+    'yaseen': ['ياسين'],
+    'yasin': ['ياسين'],
+    'yassien': ['ياسين'],
+    'oun': ['عون'],
+    'almamoori': ['المعموري'],
+    'mamoori': ['المعموري'],
+    'haitham': ['هيثم'],
+    'radhwan': ['رضوان'],
+    'muntadher': ['منتظر'],
+    'dhuhaibawi': ['الذهيباوي', 'الضهيباوي']
+  };
+
+  // Reverse Arabic to English lookup
+  const AR_TO_EN_MAP = {};
+  for (const [en, arList] of Object.entries(NAME_MAP)) {
+    for (const ar of arList) {
+      if (!AR_TO_EN_MAP[ar]) AR_TO_EN_MAP[ar] = [];
+      if (!AR_TO_EN_MAP[ar].includes(en)) AR_TO_EN_MAP[ar].push(en);
+    }
+  }
+
   /**
    * Normalizes Arabic strings by stripping diacritics and unifying letters.
    */
@@ -135,7 +351,88 @@
   }
 
   /**
-   * Generates a composite normalized search index for an attendee.
+   * Letter-level phonetic translation for any Arabic word to Latin/English.
+   */
+  function phoneticArToEn(text) {
+    const norm = normalizeArabic(text);
+    const map = {
+      'ا': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'j', 'ح': 'h',
+      'خ': 'kh', 'د': 'd', 'ذ': 'dh', 'ر': 'r', 'ز': 'z', 'س': 's',
+      'ش': 'sh', 'ص': 's', 'ض': 'd', 'ط': 't', 'ظ': 'z', 'ع': 'a',
+      'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'ل': 'l', 'م': 'm',
+      'ن': 'n', 'ه': 'h', 'و': 'w', 'ي': 'y'
+    };
+    let result = '';
+    for (let i = 0; i < norm.length; i++) {
+      const c = norm[i];
+      result += map[c] || c;
+    }
+    return result;
+  }
+
+  /**
+   * Letter-level phonetic translation for any English/Latin word to Arabic.
+   */
+  function phoneticEnToAr(text) {
+    let s = text.toLowerCase()
+      .replace(/kh/g, 'خ')
+      .replace(/sh/g, 'ش')
+      .replace(/th/g, 'ث')
+      .replace(/dh/g, 'ذ')
+      .replace(/gh/g, 'غ')
+      .replace(/ee/g, 'ي')
+      .replace(/oo/g, 'و')
+      .replace(/ou/g, 'و');
+    const map = {
+      'a': 'ا', 'b': 'ب', 'c': 'ك', 'd': 'د', 'e': 'ي', 'f': 'ف',
+      'g': 'ج', 'h': 'ه', 'i': 'ي', 'j': 'ج', 'k': 'ك', 'l': 'ل',
+      'm': 'م', 'n': 'ن', 'o': 'و', 'p': 'ب', 'q': 'ق', 'r': 'ر',
+      's': 'س', 't': 'ت', 'u': 'و', 'v': 'ف', 'w': 'و', 'x': 'كس',
+      'y': 'ي', 'z': 'ز'
+    };
+    let result = '';
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      result += map[c] || c;
+    }
+    return normalizeArabic(result);
+  }
+
+  /**
+   * Retrieves all cross-script transliteration variants for a word or query token.
+   */
+  function getTransliterations(word) {
+    if (!word) return [];
+    const normAr = normalizeArabic(word);
+    const normEn = normalizeEnglish(word);
+    const results = new Set();
+
+    // If word is English/Latin
+    if (/^[a-zA-Z\s-]+$/.test(word)) {
+      const clean = normEn.toLowerCase();
+      if (NAME_MAP[clean]) {
+        NAME_MAP[clean].forEach(ar => results.add(normalizeArabic(ar)));
+      }
+      if (clean.length >= 2) {
+        results.add(phoneticEnToAr(clean));
+      }
+    }
+
+    // If word is Arabic
+    if (/[\u0600-\u06FF]/.test(word)) {
+      if (AR_TO_EN_MAP[normAr]) {
+        AR_TO_EN_MAP[normAr].forEach(en => results.add(normalizeEnglish(en)));
+      }
+      if (normAr.length >= 2) {
+        results.add(phoneticArToEn(normAr));
+      }
+    }
+
+    return [...results];
+  }
+
+  /**
+   * Generates a composite normalized and transliterated search index for an attendee.
    */
   function getSearchableIndex(attendee) {
     const rawParts = [
@@ -147,15 +444,22 @@
       attendee.notes || ''
     ].join(' ');
 
+    const nameTokens = (attendee.fullName || '').split(/[\s-]+/).filter(Boolean);
+    const transTokens = [];
+    nameTokens.forEach(t => {
+      transTokens.push(...getTransliterations(t));
+    });
+
     return {
       raw: rawParts.toLowerCase(),
       normalizedAr: normalizeArabic(rawParts),
-      normalizedEn: normalizeEnglish(rawParts)
+      normalizedEn: normalizeEnglish(rawParts),
+      transliterated: transTokens.join(' ').toLowerCase()
     };
   }
 
   /**
-   * Tests if an attendee matches the search query.
+   * Tests if an attendee matches the search query using bilingual cross-script transliteration.
    */
   function matchesSearch(attendee, query) {
     if (!query) return true;
@@ -166,7 +470,7 @@
       attendee._searchIndex = getSearchableIndex(attendee);
     }
 
-    const { raw, normalizedAr, normalizedEn } = attendee._searchIndex;
+    const { raw, normalizedAr, normalizedEn, transliterated } = attendee._searchIndex;
 
     // Every token in the search query must match somewhere in the attendee record
     return tokens.every(token => {
@@ -174,11 +478,26 @@
       const normArToken = normalizeArabic(token);
       const normEnToken = normalizeEnglish(token);
 
-      return (
-        raw.includes(cleanToken) ||
-        (normArToken && normalizedAr.includes(normArToken)) ||
-        (normEnToken && normalizedEn.includes(normEnToken))
-      );
+      // Direct matches
+      if (raw.includes(cleanToken)) return true;
+      if (normArToken && normalizedAr.includes(normArToken)) return true;
+      if (normEnToken && normalizedEn.includes(normEnToken)) return true;
+
+      // Match against pre-indexed attendee transliterations
+      if (cleanToken && transliterated.includes(cleanToken)) return true;
+      if (normArToken && transliterated.includes(normArToken)) return true;
+      if (normEnToken && transliterated.includes(normEnToken)) return true;
+
+      // Match transliterated query token against attendee name
+      const qTrans = getTransliterations(token);
+      for (let i = 0; i < qTrans.length; i++) {
+        const t = qTrans[i];
+        if (t && (normalizedAr.includes(t) || normalizedEn.includes(t) || raw.includes(t))) {
+          return true;
+        }
+      }
+
+      return false;
     });
   }
 
@@ -1013,11 +1332,20 @@
     const safeText = escapeHtml(text);
     if (!query || !query.trim()) return safeText;
 
-    const tokens = query.trim().split(/\s+/).filter(Boolean);
-    if (tokens.length === 0) return safeText;
+    const rawTokens = query.trim().split(/\s+/).filter(Boolean);
+    if (rawTokens.length === 0) return safeText;
 
-    // Build regex pattern for highlighting
-    const escapedTokens = tokens.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const tokensToHighlight = new Set();
+    rawTokens.forEach(t => {
+      tokensToHighlight.add(t);
+      getTransliterations(t).forEach(tr => {
+        if (tr && tr.length >= 2) tokensToHighlight.add(tr);
+      });
+    });
+
+    const escapedTokens = [...tokensToHighlight].map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    if (escapedTokens.length === 0) return safeText;
+
     const regex = new RegExp(`(${escapedTokens.join('|')})`, 'gi');
     return safeText.replace(regex, '<mark style="background-color: #FEF08A; color: #1E293B; border-radius: 2px; padding: 0 2px;">$1</mark>');
   }
