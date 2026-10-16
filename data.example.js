@@ -65,5 +65,35 @@ window.INITIAL_ATTENDEES = [
     "isWalkIn": false,
     "attended": false,
     "checkInTime": null
+  },
+  {
+    "id": "vol-demo-001",
+    "originalIndex": 6,
+    "firstName": "Zaid",
+    "middleName": "H.",
+    "lastName": "Karim",
+    "fullName": "Zaid H. Karim",
+    "language": "en",
+    "isWalkIn": false,
+    "isVolunteer": true,
+    "volunteerRole": "Logistics",
+    "notes": "Volunteer · Logistics",
+    "attended": false,
+    "checkInTime": null
+  },
+  {
+    "id": "vol-demo-002",
+    "originalIndex": 7,
+    "firstName": "نور",
+    "middleName": "",
+    "lastName": "الهدى",
+    "fullName": "نور الهدى",
+    "language": "ar",
+    "isWalkIn": false,
+    "isVolunteer": true,
+    "volunteerRole": "Guest & Speaker Relations",
+    "notes": "Volunteer · Guest & Speaker Relations",
+    "attended": false,
+    "checkInTime": null
   }
 ];

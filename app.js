@@ -15,7 +15,7 @@
   const state = {
     attendees: [],
     searchQuery: '',
-    activeFilter: 'all', // 'all' | 'present' | 'absent' | 'walkin'
+    activeFilter: 'all', // 'all' | 'present' | 'absent' | 'walkin' | 'volunteer'
     activeSort: 'default',
     viewMode: localStorage.getItem(VIEW_KEY) || 'grid', // 'grid' | 'table'
     soundEnabled: localStorage.getItem(SOUND_KEY) !== 'false',
@@ -33,12 +33,14 @@
     kpiBarTrack: document.getElementById('kpiBarTrack'),
     kpiRemaining: document.getElementById('kpiRemaining'),
     kpiWalkIns: document.getElementById('kpiWalkIns'),
+    kpiVolunteers: document.getElementById('kpiVolunteers'),
 
     // Tab counts
     countAll: document.getElementById('countAll'),
     countPresent: document.getElementById('countPresent'),
     countAbsent: document.getElementById('countAbsent'),
     countWalkin: document.getElementById('countWalkin'),
+    countVolunteer: document.getElementById('countVolunteer'),
 
     // Search & Filters
     searchInput: document.getElementById('searchInput'),
@@ -568,13 +570,15 @@
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          if (initialList.length === 0 || parsed.length >= initialList.length) {
+          const savedMap = new Map(parsed.map(a => [a.id, a]));
+          const hasMissingInitial = initialList.some(initItem => !savedMap.has(initItem.id));
+
+          if (!hasMissingInitial) {
             state.attendees = parsed;
             updateAnalytics();
             return;
           } else {
-            // If saved has fewer items than initialList, preserve check-ins and merge
-            const savedMap = new Map(parsed.map(a => [a.id, a]));
+            // If saved has fewer items or is missing newly added initial attendees/volunteers, merge
             const merged = initialList.map(initItem => {
               return savedMap.has(initItem.id) ? savedMap.get(initItem.id) : JSON.parse(JSON.stringify(initItem));
             });
@@ -615,23 +619,26 @@
     const attended = state.attendees.filter(a => a.attended).length;
     const remaining = total - attended;
     const walkIns = state.attendees.filter(a => a.isWalkIn).length;
+    const volunteers = state.attendees.filter(a => a.isVolunteer).length;
     const rate = total > 0 ? Math.round((attended / total) * 100) : 0;
 
-    elements.kpiTotal.textContent = total;
-    elements.kpiAttended.textContent = attended;
-    elements.kpiRemaining.textContent = remaining;
-    elements.kpiWalkIns.textContent = walkIns;
-    elements.kpiRate.textContent = `${rate}%`;
-    elements.kpiProgressBar.style.width = `${rate}%`;
+    if (elements.kpiTotal) elements.kpiTotal.textContent = total;
+    if (elements.kpiAttended) elements.kpiAttended.textContent = attended;
+    if (elements.kpiRemaining) elements.kpiRemaining.textContent = remaining;
+    if (elements.kpiWalkIns) elements.kpiWalkIns.textContent = walkIns;
+    if (elements.kpiVolunteers) elements.kpiVolunteers.textContent = volunteers;
+    if (elements.kpiRate) elements.kpiRate.textContent = `${rate}%`;
+    if (elements.kpiProgressBar) elements.kpiProgressBar.style.width = `${rate}%`;
     if (elements.kpiBarTrack) {
       elements.kpiBarTrack.setAttribute('aria-valuenow', rate);
     }
 
     // Tab counts
-    elements.countAll.textContent = total;
-    elements.countPresent.textContent = attended;
-    elements.countAbsent.textContent = remaining;
-    elements.countWalkin.textContent = walkIns;
+    if (elements.countAll) elements.countAll.textContent = total;
+    if (elements.countPresent) elements.countPresent.textContent = attended;
+    if (elements.countAbsent) elements.countAbsent.textContent = remaining;
+    if (elements.countWalkin) elements.countWalkin.textContent = walkIns;
+    if (elements.countVolunteer) elements.countVolunteer.textContent = volunteers;
   }
 
   /* ==========================================================================
@@ -644,6 +651,7 @@
       if (state.activeFilter === 'present' && !attendee.attended) return false;
       if (state.activeFilter === 'absent' && attendee.attended) return false;
       if (state.activeFilter === 'walkin' && !attendee.isWalkIn) return false;
+      if (state.activeFilter === 'volunteer' && !attendee.isVolunteer) return false;
 
       // Filter by search query
       if (state.searchQuery && !matchesSearch(attendee, state.searchQuery)) {
@@ -700,7 +708,8 @@
       all: 'All Attendees',
       present: 'Checked In',
       absent: 'Pending',
-      walkin: 'Walk-Ins'
+      walkin: 'Walk-Ins',
+      volunteer: 'Event Volunteers'
     };
     elements.activeFilterBadge.textContent = filterNames[state.activeFilter] || 'All';
 
@@ -750,6 +759,7 @@
       const cls = ['attendee-card'];
       if (attendee.attended) cls.push('is-attended');
       if (attendee.isWalkIn) cls.push('is-walkin');
+      if (attendee.isVolunteer) cls.push('is-volunteer');
       card.className = cls.join(' ');
       card.id = `card-${attendee.id}`;
       // Stagger animation delay
@@ -762,12 +772,21 @@
 
       const checkedSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
 
+      const volunteerBadge = attendee.isVolunteer
+        ? `<span class="badge-volunteer"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Volunteer</span>`
+        : '';
+
+      const volunteerRolePill = (attendee.isVolunteer && attendee.volunteerRole)
+        ? `<div class="volunteer-role-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>${escapeHtml(attendee.volunteerRole)}</span></div>`
+        : '';
+
       card.innerHTML = `
         <div class="card-top">
           <div class="card-badges">
             <span class="badge-id">${escapeHtml(attendee.id)}</span>
             <span class="badge-lang ${langClass}">${langLabel}</span>
             ${attendee.isWalkIn ? '<span class="badge-walkin">Walk-In</span>' : ''}
+            ${volunteerBadge}
           </div>
           <div class="status-pill">
             <span class="status-dot"></span>
@@ -782,7 +801,8 @@
             ${attendee.middleName ? `<span class="name-tag"><strong>M:</strong>${escapeHtml(attendee.middleName)}</span>` : ''}
             <span class="name-tag"><strong>L:</strong>${escapeHtml(attendee.lastName || '—')}</span>
           </div>
-          ${attendee.notes ? `<p class="card-notes">${escapeHtml(attendee.notes)}</p>` : ''}
+          ${volunteerRolePill}
+          ${attendee.notes && !attendee.isVolunteer ? `<p class="card-notes">${escapeHtml(attendee.notes)}</p>` : ''}
         </div>
 
         <div class="card-foot">
@@ -821,26 +841,34 @@
 
     attendees.forEach(attendee => {
       const tr = document.createElement('tr');
-      tr.className = attendee.attended ? 'is-attended' : '';
+      const trCls = [];
+      if (attendee.attended) trCls.push('is-attended');
+      if (attendee.isVolunteer) trCls.push('is-volunteer');
+      tr.className = trCls.join(' ');
       tr.id = `row-${attendee.id}`;
 
       const isAr = attendee.language === 'ar';
       const textDir = isAr ? 'rtl' : 'ltr';
 
+      const volunteerBadge = attendee.isVolunteer
+        ? `<span class="badge-volunteer"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Volunteer</span>`
+        : (attendee.isWalkIn
+            ? '<span class="badge-walkin">Walk-In</span>'
+            : `<span class="badge-lang ${isAr ? 'ar' : 'en'}">${isAr ? 'AR' : 'EN'}</span>`
+          );
+
       tr.innerHTML = `
         <td><span class="badge-id">${escapeHtml(attendee.id)}</span></td>
         <td>
           <div class="tbl-name" dir="${textDir}">${highlightMatch(attendee.fullName, state.searchQuery)}</div>
-          ${attendee.notes ? `<div style="font-size:0.73rem;color:var(--c-text-3);margin-top:0.15rem">${escapeHtml(attendee.notes)}</div>` : ''}
+          ${attendee.volunteerRole ? `<div style="font-size:0.75rem;color:var(--c-blue);font-weight:600;margin-top:0.2rem">★ ${escapeHtml(attendee.volunteerRole)}</div>` : ''}
+          ${attendee.notes && !attendee.isVolunteer ? `<div style="font-size:0.73rem;color:var(--c-text-3);margin-top:0.15rem">${escapeHtml(attendee.notes)}</div>` : ''}
         </td>
         <td style="font-size:0.78rem;color:var(--c-text-3)">
           ${escapeHtml(attendee.firstName || '')}${attendee.middleName ? ` · <em>${escapeHtml(attendee.middleName)}</em>` : ''}${attendee.lastName ? ` · ${escapeHtml(attendee.lastName)}` : ''}
         </td>
         <td>
-          ${attendee.isWalkIn
-            ? '<span class="badge-walkin">Walk-In</span>'
-            : `<span class="badge-lang ${isAr ? 'ar' : 'en'}">${isAr ? 'AR' : 'EN'}</span>`
-          }
+          ${volunteerBadge}
         </td>
         <td>
           ${attendee.attended
@@ -924,7 +952,8 @@
     if (
       (state.activeFilter === 'present' && !attendee.attended) ||
       (state.activeFilter === 'absent' && attendee.attended) ||
-      (state.activeFilter === 'walkin' && !attendee.isWalkIn)
+      (state.activeFilter === 'walkin' && !attendee.isWalkIn) ||
+      (state.activeFilter === 'volunteer' && !attendee.isVolunteer)
     ) {
       render();
       return;
@@ -1164,7 +1193,8 @@
       'Language',
       'Status',
       'Check-In Time',
-      'Walk-In',
+      'Type',
+      'Volunteer Role',
       'Notes'
     ];
 
@@ -1177,7 +1207,8 @@
       a.language.toUpperCase(),
       a.attended ? 'Present' : 'Absent',
       a.checkInTime || '',
-      a.isWalkIn ? 'Yes' : 'No',
+      a.isVolunteer ? 'Volunteer' : (a.isWalkIn ? 'Walk-In' : 'Registered Attendee'),
+      a.volunteerRole || '',
       a.notes || ''
     ]);
 
@@ -1391,6 +1422,30 @@
         state.activeFilter = tab.getAttribute('data-filter');
         render();
       });
+    });
+
+    // KPI Card clicks trigger corresponding filter tab
+    const kpiFilterMap = [
+      { id: 'kpiBlockTotal', filter: 'all' },
+      { id: 'kpiBlockAttended', filter: 'present' },
+      { id: 'kpiBlockRemaining', filter: 'absent' },
+      { id: 'kpiBlockWalkin', filter: 'walkin' },
+      { id: 'kpiBlockVolunteer', filter: 'volunteer' }
+    ];
+    kpiFilterMap.forEach(item => {
+      const blockEl = document.getElementById(item.id);
+      if (blockEl) {
+        blockEl.style.cursor = 'pointer';
+        blockEl.addEventListener('click', () => {
+          elements.filterTabs.forEach(t => {
+            const match = t.getAttribute('data-filter') === item.filter;
+            t.classList.toggle('active', match);
+            t.setAttribute('aria-selected', match ? 'true' : 'false');
+          });
+          state.activeFilter = item.filter;
+          render();
+        });
+      }
     });
 
     // Sort select

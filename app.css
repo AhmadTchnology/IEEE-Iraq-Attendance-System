@@ -253,6 +253,7 @@ input, select { font-family: inherit; }
 .kpi-num.accent { color: var(--c-ok); }
 .kpi-num.muted  { color: var(--c-text-3); }
 .kpi-num.warm   { color: var(--c-warn); }
+.kpi-num.cyan   { color: #00629B; }
 
 .kpi-num-row {
   display: flex;
@@ -424,8 +425,9 @@ input, select { font-family: inherit; }
   font-feature-settings: 'tnum';
 }
 .ftab.active .ftab-count { background: #E0EEF7; color: var(--c-blue); }
-.ftab-count.present { background: var(--c-ok-lt); color: var(--c-ok); }
-.ftab-count.walkin  { background: var(--c-warn-lt); color: var(--c-warn); }
+.ftab-count.present   { background: var(--c-ok-lt); color: var(--c-ok); }
+.ftab-count.walkin    { background: var(--c-warn-lt); color: var(--c-warn); }
+.ftab-count.volunteer { background: #E0F2FE; color: #0284C7; }
 
 /* Action cluster */
 .action-cluster {
@@ -661,6 +663,20 @@ input, select { font-family: inherit; }
 }
 .attendee-card.is-attended::before { background: var(--c-ok); }
 .attendee-card.is-walkin::before   { background: var(--c-warn); }
+.attendee-card.is-volunteer::before { background: var(--c-cyan); }
+
+/* Volunteer card distinction */
+.attendee-card.is-volunteer {
+  border-color: rgba(0, 163, 224, 0.35);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F0F9FF 100%);
+}
+.attendee-card.is-volunteer.is-attended {
+  border-color: rgba(5, 150, 105, 0.35);
+  background: linear-gradient(180deg, #F0F9FF 0%, #ECFDF5 100%);
+}
+.attendee-card.is-volunteer.is-attended::before {
+  background: var(--c-ok);
+}
 
 /* Attended card state */
 .attendee-card.is-attended {
@@ -711,6 +727,43 @@ input, select { font-family: inherit; }
   border-radius: var(--r-sm);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.badge-volunteer {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: #E0F2FE;
+  color: #0284C7;
+  border: 1px solid #7DD3FC;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--r-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badge-volunteer svg {
+  color: #0284C7;
+  flex-shrink: 0;
+}
+
+.volunteer-role-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--c-blue);
+  background: rgba(0, 98, 155, 0.06);
+  border: 1px solid rgba(0, 98, 155, 0.18);
+  padding: 0.18rem 0.5rem;
+  border-radius: var(--r-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+.volunteer-role-pill svg {
+  color: var(--c-blue);
+  flex-shrink: 0;
 }
 
 .status-pill {
@@ -877,6 +930,9 @@ input, select { font-family: inherit; }
 .data-table tbody tr:last-child { border-bottom: none; }
 .data-table tbody tr:hover { background: var(--c-surface-2); }
 .data-table tbody tr.is-attended { background: #F0FDF8; }
+.data-table tbody tr.is-volunteer { background: #F8FAFC; }
+.data-table tbody tr.is-volunteer:hover { background: #F0F9FF; }
+.data-table tbody tr.is-volunteer.is-attended { background: #ECFDF5; }
 
 .data-table td {
   padding: 0.8rem 1rem;
