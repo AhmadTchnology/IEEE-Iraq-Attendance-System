@@ -590,7 +590,80 @@
     }
 
     saveData();
-    render();
+    updateAttendeeDOM(attendee.id);
+  }
+
+  /**
+   * Performs an efficient, targeted in-place DOM update on a single attendee's card/row.
+   * Prevents full-list re-renders, layout shifts, and entrance re-animations on check-in.
+   */
+  function updateAttendeeDOM(attendeeId) {
+    const attendee = state.attendees.find(a => a.id === attendeeId);
+    if (!attendee) return;
+
+    // If an active filter excludes this attendee, re-render the filtered view
+    if (
+      (state.activeFilter === 'present' && !attendee.attended) ||
+      (state.activeFilter === 'absent' && attendee.attended) ||
+      (state.activeFilter === 'walkin' && !attendee.isWalkIn)
+    ) {
+      render();
+      return;
+    }
+
+    const card = document.getElementById(`card-${attendee.id}`);
+    const row = document.getElementById(`row-${attendee.id}`);
+
+    // If neither element exists in DOM (e.g. view mode mismatch or unrendered), fall back to full render
+    if (!card && !row) {
+      render();
+      return;
+    }
+
+    // Update Card in-place
+    if (card) {
+      card.classList.toggle('is-attended', attendee.attended);
+
+      const statusPillText = card.querySelector('.status-pill span:last-child');
+      if (statusPillText) {
+        statusPillText.textContent = attendee.attended ? 'Present' : 'Pending';
+      }
+
+      const footTime = card.querySelector('.card-foot > div:first-child');
+      if (footTime) {
+        footTime.innerHTML = attendee.attended && attendee.checkInTime
+          ? `<span class="checkin-time">${escapeHtml(attendee.checkInTime)}</span>`
+          : `<span class="no-checkin-label">Not checked in</span>`;
+      }
+
+      const btn = card.querySelector('.checkin-btn');
+      if (btn) {
+        const checkedSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
+        btn.setAttribute('aria-label', attendee.attended ? 'Revert to absent' : 'Check in');
+        btn.innerHTML = attendee.attended
+          ? `${checkedSvg}<span class="btn-txt-normal">Attended</span><span class="btn-txt-revert">Revert</span>`
+          : `${checkedSvg}<span>Check In</span>`;
+      }
+    }
+
+    // Update Table Row in-place
+    if (row) {
+      row.classList.toggle('is-attended', attendee.attended);
+
+      if (row.cells && row.cells[4]) {
+        row.cells[4].innerHTML = attendee.attended
+          ? `<span style="font-weight:700;color:var(--c-ok)">Present</span> <span style="font-family:var(--f-mono);font-size:0.72rem;color:var(--c-text-3)">${escapeHtml(attendee.checkInTime || '')}</span>`
+          : `<span style="color:var(--c-text-3)">Pending</span>`;
+      }
+
+      const tblBtn = row.querySelector('.checkin-btn');
+      if (tblBtn) {
+        tblBtn.textContent = attendee.attended ? 'Attended' : 'Check In';
+      }
+    }
+
+    // Immediately sync analytics counters and progress bar
+    updateAnalytics();
   }
 
   function showUndoToast(actionInfo) {
@@ -640,7 +713,7 @@
 
       playAudioFeedback('undo');
       saveData();
-      render();
+      updateAttendeeDOM(attendee.id);
     }
 
     dismissUndoToast();
