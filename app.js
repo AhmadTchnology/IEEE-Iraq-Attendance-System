@@ -248,22 +248,25 @@
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= initialList.length && initialList.length > 0) {
-          state.attendees = parsed;
-          return;
-        } else if (Array.isArray(parsed) && parsed.length > 0) {
-          // If saved has fewer items than initialList, preserve check-ins and merge
-          const savedMap = new Map(parsed.map(a => [a.id, a]));
-          const merged = initialList.map(initItem => {
-            return savedMap.has(initItem.id) ? savedMap.get(initItem.id) : JSON.parse(JSON.stringify(initItem));
-          });
-          // Also append any walk-ins that were in parsed
-          parsed.filter(a => a.isWalkIn).forEach(w => {
-            if (!merged.some(m => m.id === w.id)) merged.unshift(w);
-          });
-          state.attendees = merged;
-          saveData();
-          return;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (initialList.length === 0 || parsed.length >= initialList.length) {
+            state.attendees = parsed;
+            updateAnalytics();
+            return;
+          } else {
+            // If saved has fewer items than initialList, preserve check-ins and merge
+            const savedMap = new Map(parsed.map(a => [a.id, a]));
+            const merged = initialList.map(initItem => {
+              return savedMap.has(initItem.id) ? savedMap.get(initItem.id) : JSON.parse(JSON.stringify(initItem));
+            });
+            // Also append any walk-ins that were in parsed
+            parsed.filter(a => a.isWalkIn).forEach(w => {
+              if (!merged.some(m => m.id === w.id)) merged.unshift(w);
+            });
+            state.attendees = merged;
+            saveData();
+            return;
+          }
         }
       } catch (e) {
         console.error('Failed to parse saved attendees from localStorage:', e);
@@ -369,6 +372,8 @@
      ========================================================================== */
 
   function render() {
+    updateAnalytics();
+
     const list = getProcessedAttendees();
     elements.visibleCount.textContent = list.length;
 
